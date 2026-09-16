@@ -1,9 +1,17 @@
 import os
 import json
+from pathlib import Path
 from typing import List
+
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from google import genai
 from google.genai import types
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
+
+print("API key loaded:", bool(os.getenv("GEMINI_API_KEY")))
 
 # 1. Define the Schema (Structured Output Contract)
 class ProductFeature(BaseModel):
@@ -56,11 +64,33 @@ def analyze_review_native(review_text: str) -> ReviewAnalysis:
 
 # --- Execution ---
 if __name__ == "__main__":
-    sample_review = "I bought the Sony WH-1000XM5 yesterday. The noise cancellation is absolutely mind-blowing, but the headband feels a bit flimsy compared to the older model. Overall, I'd say it's worth the $350, definitely keeping them."
-    
-    try:
-        result = analyze_review_native(sample_review)
-        print("Native SDK Result:")
-        print(json.dumps(result.model_dump(), indent=2))
-    except Exception as e:
-        print(f"Pipeline failed: {e}")
+    sample_reviews = [
+        "I bought the Apple AirPods Pro 2. The sound quality is excellent and the noise cancellation works amazingly well. Battery life is also good. I highly recommend them.",
+
+        "The Samsung Galaxy S24 has a beautiful display and the camera takes great photos. However, the battery drains faster than I expected. Still, I am happy with the phone.",
+
+        "I purchased the Logitech MX Master 3S. The mouse feels comfortable and the buttons are responsive. The only problem is that the scroll wheel started making noise after a few weeks.",
+
+        "The Nike Air Max shoes look great and are very comfortable for walking. Unfortunately, the sole started wearing out after only two months. Not worth the price.",
+
+        "I bought this laptop last month. The keyboard is excellent, performance is fast, and the screen is bright. Overall, I am very satisfied with it.",
+
+        "This coffee maker is easy to use and makes great coffee. But the water container is too small and needs to be refilled frequently.",
+
+        "I ordered these headphones but I don't remember the exact model. The sound is decent, but the ear cushions are uncomfortable after long use.",
+
+        "This product is okay. Nothing special about the build quality, but it works as expected. I would say it is neither good nor bad."
+    ]
+
+    for review in sample_reviews:
+        try:
+            result = analyze_review_native(review)
+
+            print("\nReview:")
+            print(review)
+
+            print("\nAnalysis:")
+            print(json.dumps(result.model_dump(), indent=2))
+
+        except Exception as e:
+            print(f"Pipeline failed: {e}")
