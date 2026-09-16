@@ -1,0 +1,4 @@
+google-generativeai
+pydantic
+langchain
+langchain-google-genai
